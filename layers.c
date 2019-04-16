@@ -168,7 +168,7 @@ void conv_forward(conv_layer_t *l, volume_t **inputs, volume_t **outputs, int st
 						}
 					}
                     sum += weightarr[f];
-                    volume_set(out, out_x, out_y, f, sum);
+					out->weights[((out->width * out_y) + out_x) * out->depth + f] = sum;
                 }
             }
         }
@@ -185,7 +185,7 @@ void conv_load(conv_layer_t *l, const char *file_name) {
     assert(filter_height == l->filter_height);
     assert(depth == l->input_depth);
     assert(filters == l->output_depth);
-	/*volume_t** fils = l->filters;
+	volume_t** fils = l->filters;
     for(int f = 0; f < filters; f++) {
 		double* wghts = fils[f]->weights;
 		int fildepth = fils[f]->depth;
@@ -195,23 +195,11 @@ void conv_load(conv_layer_t *l, const char *file_name) {
                 for (int d = 0; d < depth; d++) {
                     double val;
                     fscanf(fin, "%lf", &val);
-                    volume_set(l->filters[f], x, y, d, val);
 					wghts[((filwidth * y) + x) * fildepth + d] = val;
                 }
             }
         }
-    }*/
-	for (int f = 0; f < filters; f++) {
-		for (int x = 0; x < filter_width; x++) {
-			for (int y = 0; y < filter_height; y++) {
-				for (int d = 0; d < depth; d++) {
-					double val;
-					fscanf(fin, "%lf", &val);
-					volume_set(l->filters[f], x, y, d, val);
-				}
-			}
-		}
-	}
+    }
 
     for(int d = 0; d < l->output_depth; d++) {
         double val;
@@ -248,7 +236,7 @@ void relu_forward(relu_layer_t *l, volume_t **inputs, volume_t **outputs, int st
                 for (int d = 0; d < depth; d++) {
 					double vol = inputs[i]->weights[((inputs[i]->width * y) + x) * inputs[i]->depth + d];
                     double value = (vol < 0.0) ? 0.0 : vol;
-                    volume_set(outputs[i], x, y, d, value);
+					outputs[i]->weights[((outputs[i]->width * y) + x) * outputs[i]->depth + d] = value;
                 }
             }
         }
