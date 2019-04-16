@@ -146,7 +146,9 @@ void net_classify(network_t *net, volume_t **input, double **likelihoods, int n)
 	int batchsize = 100;
 	batch_t *b = make_batch(net, batchsize);
 	for (int i = 0; i < n / batchsize; i++) {
-		copy_volume(b[0][0], input[i]);
+		for (int k = 0; k < batchsize; k++) {
+			copy_volume(b[0][k], input[i * batchsize + k]);
+		}
 		net_forward(net, b, 0, 99);
 		for (int j = 0; j < NUM_CLASSES; j++) {
 			likelihoods[i][j] = b[11][0]->weights[j];
