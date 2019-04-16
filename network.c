@@ -143,14 +143,12 @@ void net_classify(network_t *net, volume_t **input, double **likelihoods, int n)
 	int i = 0;
 	int j = 0;
 	#pragma omp for private(i, j)
-	{
-		for (i = 0; i < n; i++) 
-			copy_volume(b[0][0], input[i]);
-			net_forward(net, b, 0, 0);
-			for (j = 0; j < NUM_CLASSES; j++) {
-				likelihoods[i][j] = b[11][0]->weights[j];
-			}
-		
+	for (i = 0; i < n; i++) {
+		copy_volume(b[0][0], input[i]);
+		net_forward(net, b, 0, 0);
+		for (j = 0; j < NUM_CLASSES; j++) {
+			likelihoods[i][j] = b[11][0]->weights[j];
+		}
 	}
 
     free_batch(b, 1);
