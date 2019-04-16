@@ -85,27 +85,33 @@ conv_layer_t *make_conv_layer(int input_width, int input_height, int input_depth
 // at a coordinate (x, y, d). Finally, we add the corresponding bias for the
 // filter to the sum before putting it into the output volume.
 void conv_forward(conv_layer_t *l, volume_t **inputs, volume_t **outputs, int start, int end) {
-    for (int i = start; i <= end; i++) {
+	int stride = l->stride;
+	int depth = l->output_depth;
+	int height = l->output_height;
+	int width = l->output_width;
+	for (int i = start; i <= end; i++) {
         volume_t *in = inputs[i];
         volume_t *out = outputs[i];
-
-        int stride = l->stride;
-
+		int inheight = in->height;
+		int inwidth = in->width;
         for(int f = 0; f < l->output_depth; f++) {
             volume_t *filter = l->filters[f];
-            int y = -l->pad;
-            for(int out_y = 0; out_y < l->output_height; y += stride, out_y++) {
-                int x = -l->pad;
-                for(int out_x = 0; out_x < l->output_width; x += stride, out_x++) {
+			int filheight = filter->height;
+			int filwidth = filter->width;
+			int fildepth = filter->depth;
+			int y = -l->pad;
+            for(int out_y = 0; out_y < height; y += stride, out_y++) {
+				int x = -l->pad;
+                for(int out_x = 0; out_x < width; x += stride, out_x++) {
 
                     // Take sum of element-wise product
                     double sum = 0.0;
-                    for(int fy = 0; fy < filter->height; fy++) {
+                    for(int fy = 0; fy < filheight; fy++) {
                         int in_y = y + fy;
-                        for(int fx = 0; fx < filter->width; fx++) {
+                        for(int fx = 0; fx < filwidth; fx++) {
                             int in_x = x + fx;
-                            if(in_y >= 0 && in_y < in->height && in_x >=0 && in_x < in->width) {
-                                for(int fd = 0; fd < filter->depth; fd++) {
+                            if(in_y >= 0 && in_y < inheight && in_x >=0 && in_x < inwidth) {
+                                for(int fd = 0; fd < fildepth; fd++) {
                                     sum += volume_get(filter, fx, fy, fd) * volume_get(in, in_x, in_y, fd);
                                 }
                             }
@@ -173,7 +179,8 @@ void relu_forward(relu_layer_t *l, volume_t **inputs, volume_t **outputs, int st
         for (int x = 0; x < l->input_width; x++) {
             for (int y = 0; y < l->input_height; y++) {
                 for (int d = 0; d < l->input_depth; d++) {
-                    double value = (volume_get(inputs[i], x, y, d) < 0.0) ? 0.0 : volume_get(inputs[i], x, y, d);
+					double vol = volume_get(inputs[i], x, y, d);
+                    double value = (vol < 0.0) ? 0.0 : vol;
                     volume_set(outputs[i], x, y, d, value);
                 }
             }
