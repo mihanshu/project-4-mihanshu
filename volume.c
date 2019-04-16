@@ -57,7 +57,7 @@ void copy_volume(volume_t *dest, volume_t *src) {
     for (int x = 0; x < dw; x++) {
         for (int y = 0; y < dh; y++) {
             for (int d = 0; d < dd; d++) {
-				inline double volval = sweights[((sw * y) + x) * sd + d];
+				double volval = sweights[((sw * y) + x) * sd + d];
 				dest->weights[((dw * y) + x) * dd + d] = volval;
             }
         }
