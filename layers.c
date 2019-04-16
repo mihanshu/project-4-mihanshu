@@ -89,12 +89,13 @@ void conv_forward(conv_layer_t *l, volume_t **inputs, volume_t **outputs, int st
 	int depth = l->output_depth;
 	int height = l->output_height;
 	int width = l->output_width;
+	double* weightarr = l->biases->weights;
 	for (int i = start; i <= end; i++) {
         volume_t *in = inputs[i];
         volume_t *out = outputs[i];
 		int inheight = in->height;
 		int inwidth = in->width;
-        for(int f = 0; f < l->output_depth; f++) {
+        for(int f = 0; f < depth; f++) {
             volume_t *filter = l->filters[f];
 			int filheight = filter->height;
 			int filwidth = filter->width;
@@ -118,7 +119,7 @@ void conv_forward(conv_layer_t *l, volume_t **inputs, volume_t **outputs, int st
                         }
                     }
 
-                    sum += l->biases->weights[f];
+                    sum += weightarr[f];
                     volume_set(out, out_x, out_y, f, sum);
                 }
             }
