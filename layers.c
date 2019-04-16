@@ -110,14 +110,16 @@ void conv_forward(conv_layer_t *l, volume_t **inputs, volume_t **outputs, int st
                     double sum = 0.0;
                     for(int fy = 0; fy < filheight; fy++) {
                         int in_y = y + fy;
-                        for(int fx = 0; fx < filwidth; fx++) {
-                            int in_x = x + fx;
-                            if(in_y >= 0 && in_y < inheight && in_x >=0 && in_x < inwidth) {
-                                for(int fd = 0; fd < fildepth; fd++) {
-                                    sum += volume_get(filter, fx, fy, fd) * volume_get(in, in_x, in_y, fd);
-                                }
-                            }
-                        }
+						if (in_y >= 0 && in_y < inheight) {
+							for (int fx = 0; fx < filwidth; fx++) {
+								int in_x = x + fx;
+								if (in_x >= 0 && in_x < inwidth) {
+									for (int fd = 0; fd < fildepth; fd++) {
+										sum += volume_get(filter, fx, fy, fd) * volume_get(in, in_x, in_y, fd);
+									}
+								}
+							}
+						}
                     }
 
                     sum += weightarr[f];
