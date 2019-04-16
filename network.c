@@ -139,7 +139,7 @@ void net_forward(network_t *net, batch_t *b, int start, int end) {
 }
 
 void net_classify(network_t *net, volume_t **input, double **likelihoods, int n) {
-    batch_t *b = make_batch(net, 1);
+    batch_t *b = make_batch(net, 16);
 
     for (int i = 0; i < n; i++) {
         copy_volume(b[0][0], input[i]);
