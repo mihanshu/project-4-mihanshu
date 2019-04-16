@@ -126,10 +126,11 @@ void free_batch(batch_t *b, int size) {
 
 void net_forward(network_t *net, batch_t *b, int start, int end) {
 	int i = 0;
-	#pragma omp parallel for private(i) num_threads(4)
+	#pragma omp parallel private(i) num_threads(4)
 	{
 		int id = omp_get_thread_num();
-		for (i = id * 4; i < id * 4 + 4; i++) {
+		#pragma omp for
+		for (i = id * 4; i < id * 4 + 4; i++) 
 			conv_forward(net->l0, b[0], b[1], i, i);
 			relu_forward(net->l1, b[1], b[2], i, i);
 			pool_forward(net->l2, b[2], b[3], i, i);
@@ -141,7 +142,7 @@ void net_forward(network_t *net, batch_t *b, int start, int end) {
 			pool_forward(net->l8, b[8], b[9], i, i);
 			fc_forward(net->l9, b[9], b[10], i, i);
 			softmax_forward(net->l10, b[10], b[11], i, i);
-		}
+		
 	}
 }
 
