@@ -49,7 +49,7 @@ void copy_volume(volume_t *dest, volume_t *src) {
 	int sw = src->width;
 	int sh = src->height;
 	int sd = src->depth;
-	sweights = src->weights;
+	double* sweights = src->weights;
     assert(dest->width == src->width);
     assert(dest->height == src->height);
     assert(dest->depth == src->depth);
@@ -57,7 +57,7 @@ void copy_volume(volume_t *dest, volume_t *src) {
     for (int x = 0; x < dw; x++) {
         for (int y = 0; y < dh; y++) {
             for (int d = 0; d < dd; d++) {
-				volval = sweights[((sw * y) + x) * sd + d]
+				inline double volval = sweights[((sw * y) + x) * sd + d];
 				dest->weights[((dw * y) + x) * dd + d] = volval;
             }
         }
