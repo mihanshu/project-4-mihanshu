@@ -147,7 +147,8 @@ void net_classify(network_t *net, volume_t **input, double **likelihoods, int n)
 		for (int j = 0; j < NUM_CLASSES; j++) {
 			likelihoods[i][j] = b[11][0]->weights[j];
 		}
+		free_batch(b, 1);
 	}
 
-	free_batch(b, 1);
+	
 }
