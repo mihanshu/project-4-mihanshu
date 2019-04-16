@@ -146,6 +146,10 @@ void conv_forward(conv_layer_t *l, volume_t **inputs, volume_t **outputs, int st
 									sum += resultarr[0] + resultarr[1] + resultarr[2] + resultarr[3];*/
 								}
 								else if (fildepth == 20) {
+									for (int fd = 0; fd < fildepth; fd++) {
+										sum += volume_get(filter, fx, fy, fd) * volume_get(in, in_x, in_y, fd);
+									}
+									/*
 									invect = _mm256_loadu_pd((__m256d*)(inweights + ((inwidth * in_y) + in_x) * indepth));
 									filvect = _mm256_loadu_pd((__m256d*)(filweights + ((filwidth * fy) + fx) * 20));
 									sumvect = _mm256_add_pd(_mm256_mul_pd(invect, filvect), sumvect);
@@ -162,7 +166,7 @@ void conv_forward(conv_layer_t *l, volume_t **inputs, volume_t **outputs, int st
 									filvect = _mm256_loadu_pd((__m256d*)(filweights + ((filwidth * fy) + fx) * 20 + 16));
 									sumvect = _mm256_add_pd(_mm256_mul_pd(invect, filvect), sumvect);
 									_mm256_storeu_pd(resultarr, sumvect);
-									sum += resultarr[0] + resultarr[1] + resultarr[2] + resultarr[3];
+									sum += resultarr[0] + resultarr[1] + resultarr[2] + resultarr[3];*/
 								}
 
 							}
