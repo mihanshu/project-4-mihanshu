@@ -125,33 +125,28 @@ void free_batch(batch_t *b, int size) {
 }
 
 void net_forward(network_t *net, batch_t *b, int start, int end) {
-	int i = 0;
-	#pragma omp parallel private(i) num_threads(4)
+	#pragma omp parallel num_threads(4)
 	{
-		int id = omp_get_thread_num();
-		#pragma omp for
-		for (i = id * 4; i < id * 4 + 4; i++) 
-			conv_forward(net->l0, b[0], b[1], i, i);
-			relu_forward(net->l1, b[1], b[2], i, i);
-			pool_forward(net->l2, b[2], b[3], i, i);
-			conv_forward(net->l3, b[3], b[4], i, i);
-			relu_forward(net->l4, b[4], b[5], i, i);
-			pool_forward(net->l5, b[5], b[6], i, i);
-			conv_forward(net->l6, b[6], b[7], i, i);
-			relu_forward(net->l7, b[7], b[8], i, i);
-			pool_forward(net->l8, b[8], b[9], i, i);
-			fc_forward(net->l9, b[9], b[10], i, i);
-			softmax_forward(net->l10, b[10], b[11], i, i);
-		
+		conv_forward(net->l0, b[0], b[1], start, end);
+		relu_forward(net->l1, b[1], b[2], start, end);
+		pool_forward(net->l2, b[2], b[3], start, end);
+		conv_forward(net->l3, b[3], b[4], start, end);
+		relu_forward(net->l4, b[4], b[5], start, end);
+		pool_forward(net->l5, b[5], b[6], start, end);
+		conv_forward(net->l6, b[6], b[7], start, end);
+		relu_forward(net->l7, b[7], b[8], start, end);
+		pool_forward(net->l8, b[8], b[9], start, end);
+		fc_forward(net->l9, b[9], b[10], start, end);
+		softmax_forward(net->l10, b[10], b[11], start, end);
 	}
 }
 
 void net_classify(network_t *net, volume_t **input, double **likelihoods, int n) {
-    batch_t *b = make_batch(net, 16);
+    batch_t *b = make_batch(net, 1);
 
     for (int i = 0; i < n; i++) {
         copy_volume(b[0][0], input[i]);
-        net_forward(net, b, 0, 15);
+        net_forward(net, b, 0, 0);
         for (int j = 0; j < NUM_CLASSES; j++) {
             likelihoods[i][j] = b[11][0]->weights[j];
         }
