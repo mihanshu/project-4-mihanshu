@@ -108,20 +108,20 @@ void conv_forward(conv_layer_t *l, volume_t **inputs, volume_t **outputs, int st
 
                     // Take sum of element-wise product
                     double sum = 0.0;
-                    for(int fy = 0; fy < filheight; fy++) {
-                        int in_y = y + fy;
-						if (in_y >= 0 && in_y < inheight) {
-							for (int fx = 0; fx < filwidth; fx++) {
-								int in_x = x + fx;
-								if (in_x >= 0 && in_x < inwidth) {
-									for (int fd = 0; fd < fildepth; fd++) {
+					for (int fd = 0; fd < fildepth; fd++) {
+						for (int fy = 0; fx < filheight; fy++) {
+							int in_y = y + fy;
+							if (in_y >= 0 && in_y < inheight) {
+								for (int fx = 0; fx < filwidth; fx++) {
+									int in_x = x + fx;
+									if (in_x >= 0 && in_x < inwidth) {
 										sum += volume_get(filter, fx, fy, fd) * volume_get(in, in_x, in_y, fd);
+
 									}
 								}
 							}
 						}
-                    }
-
+					}
                     sum += weightarr[f];
                     volume_set(out, out_x, out_y, f, sum);
                 }
