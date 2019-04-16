@@ -96,11 +96,14 @@ void conv_forward(conv_layer_t *l, volume_t **inputs, volume_t **outputs, int st
         volume_t *out = outputs[i];
 		int inheight = in->height;
 		int inwidth = in->width;
+		int indepth = in->depth;
+		double* inweights = in->weights;
         for(int f = 0; f < depth; f++) {
             volume_t *filter = l->filters[f];
 			int filheight = filter->height;
 			int filwidth = filter->width;
 			int fildepth = filter->depth;
+			double* filweights = filter->weights;
 			int y = -pad;
             for(int out_y = 0; out_y < height; y += stride, out_y++) {
 				int x = -pad;
@@ -114,7 +117,7 @@ void conv_forward(conv_layer_t *l, volume_t **inputs, volume_t **outputs, int st
 							int in_x = x + fx;
 							if (in_y >= 0 && in_y < inheight && in_x >= 0 && in_x < inwidth) {
 								for (int fd = 0; fd < fildepth; fd++) {
-									sum += volume_get(filter, fx, fy, fd) * volume_get(in, in_x, in_y, fd);
+									sum += filweights[((filwidth * fy) + fx) * fildepth + fd] * inweights[((inwidth * in_y) + in_x) * indepth + fd];
 								}
 							}
 						}
