@@ -89,20 +89,22 @@ void conv_forward(conv_layer_t *l, volume_t **inputs, volume_t **outputs, int st
 	int depth = l->output_depth;
 	int height = l->output_height;
 	int width = l->output_width;
+	int pad = l->pad;
 	double* weightarr = l->biases->weights;
+	volume_t** lfilters = l->filters;
 	for (int i = start; i <= end; i++) {
         volume_t *in = inputs[i];
         volume_t *out = outputs[i];
 		int inheight = in->height;
 		int inwidth = in->width;
         for(int f = 0; f < depth; f++) {
-            volume_t *filter = l->filters[f];
+            volume_t *filter = lfilters[f];
 			int filheight = filter->height;
 			int filwidth = filter->width;
 			int fildepth = filter->depth;
-			int y = -l->pad;
+			int y = -pad;
             for(int out_y = 0; out_y < height; y += stride, out_y++) {
-				int x = -l->pad;
+				int x = -pad;
                 for(int out_x = 0; out_x < width; x += stride, out_x++) {
 
                     // Take sum of element-wise product
@@ -176,10 +178,13 @@ relu_layer_t *make_relu_layer(int input_width, int input_height, int input_depth
 // Applies the Rectifier Linear Unit (ReLU) function to the input, which sets
 // output(x, y, d) to max(0.0, input(x, y, d)).
 void relu_forward(relu_layer_t *l, volume_t **inputs, volume_t **outputs, int start, int end) {
+	int depth = l->output_depth;
+	int height = l->output_height;
+	int width = l->output_width;
     for (int i = start; i <= end; i++) {
-        for (int x = 0; x < l->input_width; x++) {
-            for (int y = 0; y < l->input_height; y++) {
-                for (int d = 0; d < l->input_depth; d++) {
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                for (int d = 0; d < depth; d++) {
 					double vol = volume_get(inputs[i], x, y, d);
                     double value = (vol < 0.0) ? 0.0 : vol;
                     volume_set(outputs[i], x, y, d, value);
@@ -221,23 +226,31 @@ pool_layer_t *make_pool_layer(int input_width, int input_height, int input_depth
 // then the value of the corresponding element in the output is 5 (since that
 // is the maximum element). This effectively compresses the input.
 void pool_forward(pool_layer_t *l, volume_t **inputs, volume_t **outputs, int start, int end) {
+	int stride = l->stride;
+	int depth = l->output_depth;
+	int height = l->output_height;
+	int width = l->output_width;
+	int poolwidth = l->pool_width;
+	int poolheight = l->pool_height;
+	int pad = l->pad;
     for (int i = start; i <= end; i++) {
         volume_t *in = inputs[i];
         volume_t *out = outputs[i];
-
+		int inheight = in->height;
+		int inwidth = in->width;
         int n = 0;
-        for(int d = 0; d < l->output_depth; d++) {
-            int x = -l->pad;
-            for(int out_x = 0; out_x < l->output_width; x += l->stride, out_x++) {
-                int y = -l->pad;
-                for(int out_y = 0; out_y < l->output_height; y += l->stride, out_y++) {
+        for(int d = 0; d < depth; d++) {
+            int x = -pad;
+            for(int out_x = 0; out_x < width; x += stride, out_x++) {
+                int y = -pad;
+                for(int out_y = 0; out_y < height; y += stride, out_y++) {
 
                     double max = -INFINITY;
-                    for(int fx = 0; fx < l->pool_width; fx++) {
-                        for(int fy = 0; fy < l->pool_height; fy++) {
+                    for(int fx = 0; fx < poolwidth; fx++) {
+                        for(int fy = 0; fy < poolheight; fy++) {
                             int in_y = y + fy;
                             int in_x = x + fx;
-                            if(in_x >= 0 && in_x < in->width && in_y >= 0 && in_y < in->height) {
+                            if(in_x >= 0 && in_x < inwidth && in_y >= 0 && in_y < inheight) {
                                 double v = volume_get(in, in_x, in_y, d);
                                 if(v > max) {
                                     max = v;
