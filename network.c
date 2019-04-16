@@ -126,7 +126,7 @@ void free_batch(batch_t *b, int size) {
 
 void net_forward(network_t *net, batch_t *b, int start, int end) {
 	int i = start;
-	#pragma omp parallel for private(i, b)
+	#pragma omp parallel for private(i)
 	for (i = start; i <= end; i++) {
 		conv_forward(net->l0, b[0], b[1], i, i);
 		relu_forward(net->l1, b[1], b[2], i, i);
