@@ -109,7 +109,7 @@ void conv_forward(conv_layer_t *l, volume_t **inputs, volume_t **outputs, int st
                     // Take sum of element-wise product
                     double sum = 0.0;
 					for (int fd = 0; fd < fildepth; fd++) {
-						for (int fy = 0; fx < filheight; fy++) {
+						for (int fy = 0; fy < filheight; fy++) {
 							int in_y = y + fy;
 							if (in_y >= 0 && in_y < inheight) {
 								for (int fx = 0; fx < filwidth; fx++) {
