@@ -139,7 +139,8 @@ void conv_forward(conv_layer_t *l, volume_t **inputs, volume_t **outputs, int st
 									invect = _mm256_loadu_pd((__m256d*)(inweights + ((inwidth * in_y) + in_x) * indepth + 12));
 									filvect = _mm256_loadu_pd((__m256d*)(((filwidth * fy) + fx) * 16 + 12));
 									sumvect = _mm256_add_pd(_mm256_mul_pd(invect, filvect), sumvect);
-									_mm256_storeu_pd(sum, sumvect);
+									_mm256_storeu_pd(resultarr, sumvect);
+									sum += resultarr[0] + resultarr[1] + resultarr[2] + resultarr[3];
 								}
 								else if (fildepth == 20) {
 									invect = _mm256_loadu_pd((__m256d*)(inweights + ((inwidth * in_y) + in_x) * indepth));
@@ -157,7 +158,8 @@ void conv_forward(conv_layer_t *l, volume_t **inputs, volume_t **outputs, int st
 									invect = _mm256_loadu_pd((__m256d*)(inweights + ((inwidth * in_y) + in_x) * indepth + 16));
 									filvect = _mm256_loadu_pd((__m256d*)(((filwidth * fy) + fx) * 20 + 16));
 									sumvect = _mm256_add_pd(_mm256_mul_pd(invect, filvect), sumvect);
-									_mm256_storeu_pd(sum, sumvect);
+									_mm256_storeu_pd(resultarr, sumvect);
+									sum += resultarr[0] + resultarr[1] + resultarr[2] + resultarr[3];
 								}
 
 							}
