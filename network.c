@@ -149,5 +149,5 @@ void net_classify(network_t *net, volume_t **input, double **likelihoods, int n)
         }
     }
 
-    free_batch(b, 1);
+    free_batch(b, 16);
 }
