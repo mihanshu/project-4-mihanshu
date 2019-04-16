@@ -90,6 +90,10 @@ void conv_forward(conv_layer_t *l, volume_t **inputs, volume_t **outputs, int st
 	int height = l->output_height;
 	int width = l->output_width;
 	int pad = l->pad;
+	double resultarr[4];
+	__m256d sumvect = _mm256_setzero_pd();
+	__m256d invect = _mm256_setzero_pd();
+	__m256d filvect = _mm256_setzero_pd();
 	double* weightarr = l->biases->weights;
 	for (int i = start; i <= end; i++) {
         volume_t *in = inputs[i];
@@ -111,14 +115,51 @@ void conv_forward(conv_layer_t *l, volume_t **inputs, volume_t **outputs, int st
 
                     // Take sum of element-wise product
 					double sum = 0.0;
+					sumvect = _mm256_setzero_pd();
 					for (int fy = 0; fy < filheight; fy++) {
 						int in_y = y + fy;
 						for (int fx = 0; fx < filwidth; fx++) {
 							int in_x = x + fx;
 							if (in_y >= 0 && in_y < inheight && in_x >= 0 && in_x < inwidth) {
-								for (int fd = 0; fd < fildepth; fd++) {
-									sum += filweights[((filwidth * fy) + fx) * fildepth + fd] * inweights[((inwidth * in_y) + in_x) * indepth + fd];
+								if (fildepth == 3) {
+									sum += filweights[((filwidth * fy) + fx) * 3] * inweights[((inwidth * in_y) + in_x) * indepth];
+									sum += filweights[((filwidth * fy) + fx) * 3 + 1] * inweights[((inwidth * in_y) + in_x) * indepth + 1];
+									sum += filweights[((filwidth * fy) + fx) * 3 + 2] * inweights[((inwidth * in_y) + in_x) * indepth + 2];
 								}
+								else if (fildepth == 16) {
+									invect = _mm256_loadu_pd((__m256d*)(inweights + ((inwidth * in_y) + in_x) * indepth));
+									filvect = _mm256_loadu_pd((__m256d*)(((filwidth * fy) + fx) * 16));
+									sumvect = _mm256_add_pd(_mm256_mul_pd(invect, filvect), sumvect);
+									invect = _mm256_loadu_pd((__m256d*)(inweights + ((inwidth * in_y) + in_x) * indepth + 4));
+									filvect = _mm256_loadu_pd((__m256d*)(((filwidth * fy) + fx) * 16 + 4));
+									sumvect = _mm256_add_pd(_mm256_mul_pd(invect, filvect), sumvect);
+									invect = _mm256_loadu_pd((__m256d*)(inweights + ((inwidth * in_y) + in_x) * indepth + 8));
+									filvect = _mm256_loadu_pd((__m256d*)(((filwidth * fy) + fx) * 16 + 8));
+									sumvect = _mm256_add_pd(_mm256_mul_pd(invect, filvect), sumvect);
+									invect = _mm256_loadu_pd((__m256d*)(inweights + ((inwidth * in_y) + in_x) * indepth + 12));
+									filvect = _mm256_loadu_pd((__m256d*)(((filwidth * fy) + fx) * 16 + 12));
+									sumvect = _mm256_add_pd(_mm256_mul_pd(invect, filvect), sumvect);
+									_mm256_storeu_pd(sum, sumvect);
+								}
+								else if (fildepth == 20) {
+									invect = _mm256_loadu_pd((__m256d*)(inweights + ((inwidth * in_y) + in_x) * indepth));
+									filvect = _mm256_loadu_pd((__m256d*)(((filwidth * fy) + fx) * 20));
+									sumvect = _mm256_add_pd(_mm256_mul_pd(invect, filvect), sumvect);
+									invect = _mm256_loadu_pd((__m256d*)(inweights + ((inwidth * in_y) + in_x) * indepth + 4));
+									filvect = _mm256_loadu_pd((__m256d*)(((filwidth * fy) + fx) * 20 + 4));
+									sumvect = _mm256_add_pd(_mm256_mul_pd(invect, filvect), sumvect);
+									invect = _mm256_loadu_pd((__m256d*)(inweights + ((inwidth * in_y) + in_x) * indepth + 8));
+									filvect = _mm256_loadu_pd((__m256d*)(((filwidth * fy) + fx) * 20 + 8));
+									sumvect = _mm256_add_pd(_mm256_mul_pd(invect, filvect), sumvect);
+									invect = _mm256_loadu_pd((__m256d*)(inweights + ((inwidth * in_y) + in_x) * indepth + 12));
+									filvect = _mm256_loadu_pd((__m256d*)(((filwidth * fy) + fx) * 20 + 12));
+									sumvect = _mm256_add_pd(_mm256_mul_pd(invect, filvect), sumvect);
+									invect = _mm256_loadu_pd((__m256d*)(inweights + ((inwidth * in_y) + in_x) * indepth + 16));
+									filvect = _mm256_loadu_pd((__m256d*)(((filwidth * fy) + fx) * 20 + 16));
+									sumvect = _mm256_add_pd(_mm256_mul_pd(invect, filvect), sumvect);
+									_mm256_storeu_pd(sum, sumvect);
+								}
+
 							}
 						}
 					}
